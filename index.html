@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hero Quest</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: skyblue; }
+        #gameCanvas { background: lightgreen; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let x = 50, y = 350, gravity = 1, velocity = 0, isJumping = false;
+
+        function drawHero() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(x, y, 50, 50);
+        }
+
+        function update() {
+            if (isJumping) {
+                velocity -= gravity;
+                y -= velocity;
+                if (y >= 350) {
+                    y = 350;
+                    isJumping = false;
+                    velocity = 0;
+                }
+            }
+            drawHero();
+            requestAnimationFrame(update);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' && !isJumping) {
+                isJumping = true;
+                velocity = 15;
+            }
+        });
+
+        update();
+    </script>
+</body>
+</html>
