@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super XHreo</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: skyblue;
+    }
+    canvas {
+      display: block;
+      background: lightgreen;
+    }
+    .controls {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+    .btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      font-size: 24px;
+      text-align: center;
+      line-height: 60px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <div class="controls">
+    <div class="btn" id="leftBtn">⟵</div>
+    <div class="btn" id="jumpBtn">⬆</div>
+    <div class="btn" id="rightBtn">⟶</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let player = {
+      x: 50,
+      y: 300,
+      width: 40,
+      height: 40,
+      color: "red",
+      dy: 0,
+      onGround: false
+    };
+
+    const gravity = 0.8;
+    let keys = { left: false, right: false, jump: false };
+
+    const ground = {
+      x: 0,
+      y: 350,
+      width: 800,
+      height: 50,
+      color: "green"
+    };
+
+    const coins = [
+      { x: 200, y: 300, width: 20, height: 20, collected: false },
+      { x: 400, y: 300, width: 20, height: 20, collected: false },
+    ];
+
+    let score = 0;
+
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    function drawGround() {
+      ctx.fillStyle = ground.color;
+      ctx.fillRect(ground.x, ground.y, ground.width, ground.height);
+    }
+
+    function drawCoins() {
+      ctx.fillStyle = "gold";
+      for (let coin of coins) {
+        if (!coin.collected) {
+          ctx.beginPath();
+          ctx.arc(coin.x + 10, coin.y + 10, 10, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function drawScore() {
+      ctx.fillStyle = "black";
+      ctx.font = "20px Arial";
+      ctx.fillText("Score: " + score, 10, 30);
+    }
+
+    function update() {
+      if (keys.left) player.x -= 4;
+      if (keys.right) player.x += 4;
+
+      player.dy += gravity;
+      player.y += player.dy;
+
+      if (player.y + player.height >= ground.y) {
+        player.y = ground.y - player.height;
+        player.dy = 0;
+        player.onGround = true;
+      } else {
+        player.onGround = false;
+      }
+
+      // Coin collision
+      for (let coin of coins) {
+        if (
+          !coin.collected &&
+          player.x < coin.x + coin.width &&
+          player.x + player.width > coin.x &&
+          player.y < coin.y + coin.height &&
+          player.y + player.height > coin.y
+        ) {
+          coin.collected = true;
+          score += 10;
+        }
+      }
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGround();
+      drawCoins();
+      drawPlayer();
+      drawScore();
+      update();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+
+    // Touch controls
+    document.getElementById("leftBtn").addEventListener("touchstart", () => keys.left = true);
+    document.getElementById("leftBtn").addEventListener("touchend", () => keys.left = false);
+
+    document.getElementById("rightBtn").addEventListener("touchstart", () => keys.right = true);
+    document.getElementById("rightBtn").addEventListener("touchend", () => keys.right = false);
+
+    document.getElementById("jumpBtn").addEventListener("touchstart", () => {
+      if (player.onGround) {
+        player.dy = -12;
+        player.onGround = false;
+      }
+    });
+  </script>
+</body>
+</html>
